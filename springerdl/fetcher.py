@@ -66,7 +66,9 @@ options_default = {
 
 
 class springerFetcher(object):
-    def __init__(self, springer_id, outf, p, options):
+    def __init__(self, springer_id, outf, p, options, session=None):
+        self.session = session or requests.session()
+
         self.opts = options
         for key in options_default:
             if key not in options:
@@ -262,7 +264,7 @@ class springerFetcher(object):
 
     def fetchCover(self):
         try:
-            webImg = requests.get('%s/covers/%s.tif'
+            webImg = self.session.get('%s/covers/%s.tif'
                                   % (SPR_IMG_URL, self.info['print_isbn']))
             webImg.raise_for_status()
             tmp_img = NamedTemporaryFile(delete=False, suffix=".tif")
@@ -313,7 +315,7 @@ class springerFetcher(object):
                                  % (self.tmp_pgs_j, self.info['chapter_cnt']))
                 pdf = NamedTemporaryFile(delete=False)
                 self.pauseBeforeHttpGet()
-                webPDF = requests.get(SPRINGER_URL + el['pdf_url'],
+                webPDF = self.session.get(SPRINGER_URL + el['pdf_url'],
                                       stream=True)
                 webPDF.raise_for_status()
                 file_size = int(webPDF.headers['content-length'].strip())
