@@ -2,6 +2,16 @@
 
 import sys
 
+# FIXME: change this as soon as requests proxy support reaches mainline
+import requesocks as requests
+
+
+def port_or_addr(s):
+    try:
+        return 'localhost:%d' % int(s)
+    except ValueError:
+        return s
+
 
 def main(argv=sys.argv):
     from os import isatty
@@ -17,6 +27,10 @@ def main(argv=sys.argv):
         parser.add_argument('springername', metavar='SPRINGER_IDENTIFIER',
                             type=str, help=_('A string identifying the book, '
                                              + 'e.g. its URL or Online-ISBN.'))
+        parser.add_argument('-D', '--socks-proxy', type=port_or_addr,
+                            help='SOCKS proxy to use. Can be an integer PORT ('
+                                 'equivalent to localhost:PORT) or a full '
+                                 'domain name')
         parser.add_argument('-o', '--output', metavar='FILE', type=str,
                             help=_('Place to store, default: "ONLINE_ISBN.pdf".'))
         parser.add_argument('--no-cover', action="store_true", default=False,
@@ -53,7 +67,24 @@ def main(argv=sys.argv):
             "pdftk": args.pdftk,
             "verbose": args.verbose,
         }
-        fet = springerFetcher(args.springername, args.output, printer(), opts)
+
+        # setup session
+        session = requests.Session()
+
+        if args.socks_proxy:
+            session.proxies = {
+                'http': 'socks5://%s' % args.socks_proxy,
+            }
+            session.proxies['https'] = session.proxies['http']
+            if args.verbose:
+                print 'Using proxy %s' % session.proxies
+
+        fet = springerFetcher(
+            args.springername,
+            args.output,
+            printer(),
+            opts,
+            session)
         fet.run()
     else:
         from springerdl.gui import gui_main

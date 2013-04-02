@@ -7,7 +7,6 @@ import re
 from sys import stdout
 
 from BeautifulSoup import BeautifulSoup
-import requests
 
 
 class printer:
@@ -119,22 +118,6 @@ def decodeForSure(s):
                 pass
         print _("Can't decode") + " s='%s',  type(s)=%s" % (s, type(s))
         return s.decode("ascii", "replace")
-
-
-def getSoup(url):
-    hexentityMassage = copy.copy(BeautifulSoup.MARKUP_MASSAGE)
-    hexentityMassage += [(re.compile('&#x([0-9a-fA-F]+);'),
-                         lambda m: '&#%d;' % int(m.group(1), 16))]
-    try:
-        r = requests.get(url)
-        r.raise_for_status()
-        soup = BeautifulSoup(r.text,
-                             convertEntities=BeautifulSoup.HTML_ENTITIES,
-                             markupMassage=hexentityMassage)
-    except requests.HTTPError:
-        print _("Connection to %s failed.") % url
-        return None
-    return soup
 
 
 def cleanSoup(soup):

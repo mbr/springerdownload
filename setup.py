@@ -15,7 +15,10 @@ setup(
     author_email='git@marcbrinkmann.de',
     url='https://github.com/tuxor1337/springerdownload',
     packages=find_packages(),
-    install_requires=['pyPDF', 'beautifulsoup', 'requests'],
+
+    # depends on requesocks until requests merge socks proxy support into
+    # mainline
+    install_requires=['pyPDF', 'beautifulsoup', 'requesocks'],
     entry_points={
         'console_scripts': [
             'springerdl = springerdl.main:main',

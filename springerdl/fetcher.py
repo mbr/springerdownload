@@ -5,7 +5,7 @@ end of the script might fail irremediably.
 """
 
 import pyPdf
-import requests
+import requesocks as requests
 
 
 def new_createStringObject(string):
@@ -67,7 +67,7 @@ options_default = {
 
 class springerFetcher(object):
     def __init__(self, springer_id, outf, p, options, session=None):
-        self.session = session or requests.session()
+        self.session = session or requests.Session()
 
         self.opts = options
         for key in options_default:
@@ -116,11 +116,24 @@ class springerFetcher(object):
             self.p.out("Ghostscript: %s" % GS_BIN)
             self.p.out("PDF Toolkit: %s" % PDFTK_BIN)
         self.pauseBeforeHttpGet()
-        self.soup = getSoup(self.book_url)
-        if self.soup == None:
+
+        # run beautiful soup parsing
+        hexentityMassage = copy.copy(BeautifulSoup.MARKUP_MASSAGE)
+        hexentityMassage += [(re.compile('&#x([0-9a-fA-F]+);'),
+                             lambda m: '&#%d;' % int(m.group(1), 16))]
+        try:
+            r = self.session.get(self.book_url)
+            r.raise_for_status()
+        except requests.HTTPError:
             self.p.err(_(
-                "The specified identifier doesn't point to an existing Springer book resource"))
+                'The specified identifier doesn\'t point to an '
+                'existing Springer book resource'))
             return
+
+        self.soup = BeautifulSoup(r.text,
+                                  convertEntities=BeautifulSoup.HTML_ENTITIES,
+                                  markupMassage=hexentityMassage)
+
         self.p.doing(_("Fetching book info"))
         self.fetchBookInfo()
         self.p.done()
@@ -315,15 +328,15 @@ class springerFetcher(object):
                                  % (self.tmp_pgs_j, self.info['chapter_cnt']))
                 pdf = NamedTemporaryFile(delete=False)
                 self.pauseBeforeHttpGet()
-                webPDF = self.session.get(SPRINGER_URL + el['pdf_url'],
-                                      stream=True)
+                webPDF = self.session.get(SPRINGER_URL + el['pdf_url'])
                 webPDF.raise_for_status()
                 file_size = int(webPDF.headers['content-length'].strip())
-                downloaded_size = 0
-                for data in webPDF.iter_content(DOWNLOAD_CHUNK_SIZE):
-                    pdf.write(data)
-                    downloaded_size += len(data)
-                    pgs.update(downloaded_size/1024, file_size/1024)
+
+                # we just fake updates here, as the old requests version
+                # requesocks is based upon doesn't support stream or
+                # iter_content
+                pgs.update(file_size/1024, file_size/1024)
+                pdf.write(webPDF.content)
                 self.chPdf.append(pdf)
 
                 inputPDF = pyPdf.PdfFileReader(pdf)
