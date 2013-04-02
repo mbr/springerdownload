@@ -3,8 +3,10 @@ import os, sys
 from distutils.core import setup
 from distutils.dep_util import newer
 from distutils.command.build_scripts \
-      import build_scripts as distutils_build_scripts
+        import build_scripts as distutils_build_scripts
 from distutils.command.bdist_dumb import bdist_dumb
+
+VERSION = "1.1"
 
 class build_scripts(distutils_build_scripts):
     def run(self):
@@ -51,7 +53,7 @@ if "single_file" in sys.argv:
     data_files = []
 
 setup(name='Springer Link Downloader',
-      version='1.0',
+      version=VERSION,
       cmdclass={"build_scripts": build_scripts, "single_file": single_file},
       description='Download whole books from link.springer.com',
       author='Thomas Vogt',
