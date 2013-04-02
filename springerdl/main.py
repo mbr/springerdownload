@@ -58,5 +58,3 @@ def main(argv=sys.argv):
     else:
         from springerdl.gui import gui_main
         gui_main(springerFetcher)
-
-    return 0
