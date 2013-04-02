@@ -13,7 +13,7 @@ setup(
     author='Marc Brinkmann <git@marcbrinkmann.de>, '
            'Thomas Vogt <tuxor1337@web.de>',
     author_email='git@marcbrinkmann.de',
-    url='https://github.com/tuxor1337/springerdownload',
+    url='https://github.com/mbr/springerdownload',
     packages=find_packages(),
 
     # depends on requesocks until requests merge socks proxy support into
