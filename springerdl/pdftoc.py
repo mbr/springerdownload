@@ -1,21 +1,17 @@
-
 from util import decodeForSure
 import pyPdf
-   
-################################################################################
-########################## PDF toc and labels  #################################
-################################################################################
+
 
 def _getDestinationPageNumbers(pdf):
-    def _setup_outline_page_ids(outline, _result=None,lvl=0):
+    def _setup_outline_page_ids(outline, _result=None, lvl=0):
         if _result is None:
             _result = {}
         for obj in outline:
             if isinstance(obj, pyPdf.pdf.Destination) and not \
-                isinstance(obj.page, pyPdf.generic.NullObject):
-                _result[(id(obj), obj.title)] = (obj.page.idnum,lvl)
+                    isinstance(obj.page, pyPdf.generic.NullObject):
+                _result[(id(obj), obj.title)] = (obj.page.idnum, lvl)
             elif isinstance(obj, list):
-                _setup_outline_page_ids(obj, _result,lvl+1)
+                _setup_outline_page_ids(obj, _result, lvl+1)
         return _result
 
     def _setup_page_id_to_num(pages=None, _result=None, _num_pages=None):
@@ -41,16 +37,19 @@ def _getDestinationPageNumbers(pdf):
     page_id_to_page_numbers = _setup_page_id_to_num()
 
     result = []
-    for (_, title), (page_idnum,lvl) in outline_page_ids.iteritems():
+    for (_, title), (page_idnum, lvl) in outline_page_ids.iteritems():
         if page_id_to_page_numbers.get(page_idnum) != None:
-            result.append([title,page_id_to_page_numbers.get(page_idnum),lvl])
+            result.append([title, page_id_to_page_numbers.get(
+                page_idnum), lvl])
     return result
-   
-def getTocFromPdf(pdf,shift=0,default=None,baselvl=0,child_cnt=0):
+
+
+def getTocFromPdf(pdf, shift=0, default=None, baselvl=0, child_cnt=0):
     ch = _getDestinationPageNumbers(pdf)
-    if ch == None: return []
+    if ch == None:
+        return []
     ch.sort(key=lambda x: x[1:3])
-    ch = [[decodeForSure(x[0]),x[1]+shift,x[2]+baselvl] for x in ch]
+    ch = [[decodeForSure(x[0]), x[1]+shift, x[2]+baselvl] for x in ch]
     for i in range(len(ch)):
         j = k = 0
         while i+j+1 < len(ch) and ch[i+j+1][2] > ch[i][2]:
@@ -58,10 +57,11 @@ def getTocFromPdf(pdf,shift=0,default=None,baselvl=0,child_cnt=0):
             j += 1
         ch[i].append(k)
     if len(ch) == 0 and default != None:
-        ch.append([default,1+shift,baselvl,child_cnt])
+        ch.append([default, 1+shift, baselvl, child_cnt])
     return ch
-   
-def getPagelabelsFromPdf(pdf,shift=0,start=None):
+
+
+def getPagelabelsFromPdf(pdf, shift=0, start=None):
     if start == None:
         start = shift
     try:
@@ -69,12 +69,11 @@ def getPagelabelsFromPdf(pdf,shift=0,start=None):
     except KeyError:
         pldef = []
     pls = []
-    for i in range(0,len(pldef),2):
-        pls.append([int(pldef[i])+shift,pldef[i+1].getObject()])
+    for i in range(0, len(pldef), 2):
+        pls.append([int(pldef[i])+shift, pldef[i+1].getObject()])
     if len(pls) == 0:
         if start < 0:
-            pls.append([shift,{"/S":"/r","/St":str(1000+start)}])
+            pls.append([shift, {"/S": "/r", "/St": str(1000+start)}])
         else:
-            pls.append([shift,{"/S":"/D","/St":str(start)}])
+            pls.append([shift, {"/S": "/D", "/St": str(start)}])
     return pls
-         
