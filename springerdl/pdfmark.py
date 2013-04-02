@@ -1,5 +1,6 @@
-from util import decodeForSure
 from time import localtime, strftime
+
+from util import decodeForSure
 
 
 def _uniconvHex(s):

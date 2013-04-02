@@ -1,5 +1,6 @@
-from util import decodeForSure
 import pyPdf
+
+from util import decodeForSure
 
 
 def _getDestinationPageNumbers(pdf):

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import re
 import copy
-from BeautifulSoup import BeautifulSoup
-from math import floor
-from sys import stdout
 from gettext import gettext as _
+from math import floor
+import re
+from sys import stdout
+
+from BeautifulSoup import BeautifulSoup
 import requests
 
 
