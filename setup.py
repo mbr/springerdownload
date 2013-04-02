@@ -10,7 +10,6 @@ setup(
     author_email='tuxor1337@web.de',
     url='https://github.com/tuxor1337/springerdownload',
     packages=find_packages(),
-    scripts=['springer_download.py'],
     install_requires=['pyPDF', 'beautifulsoup'],
     entry_points={
         'console_scripts': [
