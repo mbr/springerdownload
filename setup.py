@@ -15,7 +15,7 @@ setup(
     author_email='git@marcbrinkmann.de',
     url='https://github.com/tuxor1337/springerdownload',
     packages=find_packages(),
-    install_requires=['pyPDF', 'beautifulsoup'],
+    install_requires=['pyPDF', 'beautifulsoup', 'requests'],
     entry_points={
         'console_scripts': [
             'springerdl = springerdl.main:main',
