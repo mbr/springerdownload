@@ -1,13 +1,18 @@
+import os
 from setuptools import setup, find_packages
 
-VERSION = "1.1"
+
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 
 setup(
-    name='Springer Link Downloader',
-    version=VERSION,
+    name='springerdl',
+    version='1.2-dev',
     description='Download whole books from link.springer.com',
-    author='Thomas Vogt',
-    author_email='tuxor1337@web.de',
+    author='Marc Brinkmann <git@marcbrinkmann.de>, '
+           'Thomas Vogt <tuxor1337@web.de>',
+    author_email='git@marcbrinkmann.de',
     url='https://github.com/tuxor1337/springerdownload',
     packages=find_packages(),
     install_requires=['pyPDF', 'beautifulsoup'],
