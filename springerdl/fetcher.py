@@ -82,6 +82,18 @@ class springerFetcher(object):
         self.extracted_toc = []
         self.chPdf = []
 
+    def getSoup(self, url):
+        hexentityMassage = copy.copy(BeautifulSoup.MARKUP_MASSAGE)
+        hexentityMassage += [(re.compile('&#x([0-9a-fA-F]+);'),
+                             lambda m: '&#%d;' % int(m.group(1), 16))]
+
+        r = self.session.get(url)
+        r.raise_for_status()
+
+        return BeautifulSoup(r.text,
+                             convertEntities=BeautifulSoup.HTML_ENTITIES,
+                             markupMassage=hexentityMassage)
+
     def parseSpringerURL(self, url):
         url = url.replace("http://", "")
         url = url.replace("link.springer.com/", "")
@@ -115,24 +127,9 @@ class springerFetcher(object):
             self.p.out("ImageMagick: %s" % IM_BIN)
             self.p.out("Ghostscript: %s" % GS_BIN)
             self.p.out("PDF Toolkit: %s" % PDFTK_BIN)
+
         self.pauseBeforeHttpGet()
-
-        # run beautiful soup parsing
-        hexentityMassage = copy.copy(BeautifulSoup.MARKUP_MASSAGE)
-        hexentityMassage += [(re.compile('&#x([0-9a-fA-F]+);'),
-                             lambda m: '&#%d;' % int(m.group(1), 16))]
-        try:
-            r = self.session.get(self.book_url)
-            r.raise_for_status()
-        except requests.HTTPError:
-            self.p.err(_(
-                'The specified identifier doesn\'t point to an '
-                'existing Springer book resource'))
-            return
-
-        self.soup = BeautifulSoup(r.text,
-                                  convertEntities=BeautifulSoup.HTML_ENTITIES,
-                                  markupMassage=hexentityMassage)
+        self.soup = self.getSoup(self.book_url)
 
         self.p.doing(_("Fetching book info"))
         self.fetchBookInfo()
@@ -213,7 +210,7 @@ class springerFetcher(object):
                                 self.tocFromDiv(self.soup.find("div", {"class": "toc"})))
             if i < dl_page_cnt:
                 self.pauseBeforeHttpGet()
-                self.soup = getSoup("%s/page/%d" % (self.book_url, i+1))
+                self.soup = self.getSoup("%s/page/%d" % (self.book_url, i+1))
 
     def tocFromDiv(self, div):
         def append_ch(ch_list, title="", children=[], pdf_url="",
