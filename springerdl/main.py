@@ -8,20 +8,20 @@ import sys
 
 def main(argv=sys.argv):
     from os import isatty
-    from springerdl.fetcher import springerFetcher
-   
+    from .fetcher import springerFetcher
+
     if (isatty(0) or len(argv) > 1) and "--gui" not in  argv[1:]:
         from argparse import ArgumentParser
         from springerdl.util import printer
         from gettext import gettext as _
-        
+
         parser = ArgumentParser(description = _('Fetch whole books from'
                                             + ' link.springer.com.'))
         parser.add_argument('springername', metavar='SPRINGER_IDENTIFIER',
                         type=str, help = _('A string identifying the book, '
                                        + 'e.g. its URL or Online-ISBN.'))
-        parser.add_argument('-o','--output', metavar='FILE', type=str, 
-                        help=_('Place to store, default: "ONLINE_ISBN.pdf".'))  
+        parser.add_argument('-o','--output', metavar='FILE', type=str,
+                        help=_('Place to store, default: "ONLINE_ISBN.pdf".'))
         parser.add_argument('--no-cover', action="store_true", default=False,
                         help=_("Don't add front cover as first page."))
         parser.add_argument('--autotitle', action="store_true", default=False,
@@ -59,10 +59,5 @@ def main(argv=sys.argv):
     else:
         from springerdl.gui import gui_main
         gui_main(springerFetcher)
-      
-    return 0
 
-if __name__ == "__main__":
-    sys.exit(main())
-      
-   
+    return 0

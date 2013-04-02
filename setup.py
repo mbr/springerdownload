@@ -12,4 +12,9 @@ setup(
     packages=find_packages(),
     scripts=['springer_download.py'],
     install_requires=['pyPDF', 'beautifulsoup'],
+    entry_points={
+        'console_scripts': [
+            'springerdl = springerdl.main:main',
+        ],
+    }
 )
