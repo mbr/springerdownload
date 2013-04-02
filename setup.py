@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name='springerdl',
-    version='1.2-dev',
+    version='1.3-dev',
     description='Download whole books from link.springer.com',
     author='Marc Brinkmann <git@marcbrinkmann.de>, '
            'Thomas Vogt <tuxor1337@web.de>',
