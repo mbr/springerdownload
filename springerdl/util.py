@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import httplib
 import re
-import urllib2
 import copy
 from BeautifulSoup import BeautifulSoup
 from math import floor
 from sys import stdout
 from gettext import gettext as _
+import requests
 
 
 class printer:
@@ -121,15 +120,17 @@ def decodeForSure(s):
         return s.decode("ascii", "replace")
 
 
-def getSoup(url, params=None, charset='utf8'):
+def getSoup(url):
     hexentityMassage = copy.copy(BeautifulSoup.MARKUP_MASSAGE)
     hexentityMassage += [(re.compile('&#x([0-9a-fA-F]+);'),
                          lambda m: '&#%d;' % int(m.group(1), 16))]
     try:
-        html = urllib2.urlopen(url, params).read().decode(charset)
-        soup = BeautifulSoup(html, convertEntities=BeautifulSoup.HTML_ENTITIES,
+        r = requests.get(url)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text,
+                             convertEntities=BeautifulSoup.HTML_ENTITIES,
                              markupMassage=hexentityMassage)
-    except (urllib2.URLError, httplib.BadStatusLine):
+    except requests.HTTPError:
         print _("Connection to %s failed.") % url
         return None
     return soup

@@ -1,22 +1,11 @@
 """
-First attempt to implement Python 3 support. There is still a long way to go
-though, mainly because there is no pyPdf (or PyPdf2) for Python 3.
-"""
-try:
-    from urllib2 import urlopen, URLError
-    from httplib import BadStatusLine
-except:
-    from urllib.request import urlopen
-    from urllib.error import URLError
-    from http.client import BadStatusLine
-
-"""
 Prevent problems with pyPdf's string handling (not yet fixed in PyPDF2).
 This might cause performance problems, but otherwise the merge process at the
 end of the script might fail irremediably.
 """
 
 import pyPdf
+import requests
 
 
 def new_createStringObject(string):
@@ -273,11 +262,12 @@ class springerFetcher(object):
 
     def fetchCover(self):
         try:
-            webImg = urlopen("%s/covers/%s.tif"
-                             % (SPR_IMG_URL, self.info['print_isbn']))
+            webImg = requests.get('%s/covers/%s.tif'
+                                  % (SPR_IMG_URL, self.info['print_isbn']))
+            webImg.raise_for_status()
             tmp_img = NamedTemporaryFile(delete=False, suffix=".tif")
             tmp_pdfimg = NamedTemporaryFile(delete=False, suffix=".pdf")
-            tmp_img.write(webImg.read())
+            tmp_img.write(webImg.content)
             tmp_img.close()
             cmd = [IM_BIN, "-resize", "%fx%f" % (2*self.info['pagesize'][0],
                                                  2*self.info['pagesize'][1]),
@@ -293,7 +283,7 @@ class springerFetcher(object):
             self.labels += [[0, {"/P": "(Cover)"}], [1, {"/S": "/D"}]]
             self.total_pages += 1
             return True
-        except (URLError, BadStatusLine):
+        except requests.HTTPError:
             return False
 
     def fetchPdfData(self, pgs=None):
@@ -323,15 +313,13 @@ class springerFetcher(object):
                                  % (self.tmp_pgs_j, self.info['chapter_cnt']))
                 pdf = NamedTemporaryFile(delete=False)
                 self.pauseBeforeHttpGet()
-                webPDF = urlopen(SPRINGER_URL + el['pdf_url'])
-                file_size = int(webPDF.info().getheader(
-                    'Content-Length').strip())
+                webPDF = requests.get(SPRINGER_URL + el['pdf_url'],
+                                      stream=True)
+                webPDF.raise_for_status()
+                file_size = int(webPDF.headers['content-length'].strip())
                 downloaded_size = 0
-                while 1:
-                    data = webPDF.read(DOWNLOAD_CHUNK_SIZE)
+                for data in webPDF.iter_content(DOWNLOAD_CHUNK_SIZE):
                     pdf.write(data)
-                    if not data:
-                        break
                     downloaded_size += len(data)
                     pgs.update(downloaded_size/1024, file_size/1024)
                 self.chPdf.append(pdf)
