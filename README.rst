@@ -5,6 +5,15 @@ A fork of `Thomas Vogt's "Springer Link Downloader"
 <https://github.com/tuxor1337/springerdownload>`_. Adds easier installation
 through a more standard ``setup.py`` and *SOCKS*-proxy support.
 
+Installation
+------------
+
+Preferably in a `virtual environment
+<https://pypi.python.org/pypi/virtualenv>`_, install using `PyPi
+<https://pypi.python.org>`_::
+
+   pip install springerdl
+
 Usage
 -----
 
